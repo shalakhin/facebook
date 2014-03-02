@@ -90,7 +90,7 @@ func (g *Graph) GetAccessToken(r *http.Request) error {
 	if values, err = url.ParseQuery(string(result)); err != nil {
 		return err
 	}
-	if expire, err = time.ParseDuration(values.Get("expires") + "s"); err != nil {
+	if expire, err = time.ParseDuration(values.Get("expires")); err != nil {
 		return err
 	}
 
