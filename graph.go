@@ -1,6 +1,7 @@
 package facebook
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -90,7 +91,8 @@ func (g *Graph) GetAccessToken(r *http.Request) error {
 	if values, err = url.ParseQuery(string(result)); err != nil {
 		return err
 	}
-	if expire, err = time.ParseDuration(values.Get("expires")); err != nil {
+	durationStr := fmt.Sprintf("%ss", values.Get("expires"))
+	if expire, err = time.ParseDuration(durationStr); err != nil {
 		return err
 	}
 
