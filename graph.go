@@ -3,10 +3,10 @@ package facebook
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -22,7 +22,8 @@ type (
 		Expire      time.Duration
 		// Full list of scope options here:
 		// https://developers.facebook.com/docs/facebook-login/permissions/
-		Scope []string
+		Scope  []string
+		UserID string
 
 		apptoken        string
 		requestTokenURL *url.URL
@@ -35,7 +36,7 @@ type (
 	}
 	// DebugData contains all fields returned in DebugInfo
 	DebugData struct {
-		AppID       string    `json:"app_id"`
+		AppID       int       `json:"app_id"`
 		Application string    `json:"application"`
 		ExpiresAt   EpochTime `json:"expires_at"`
 		IsValid     bool      `json:"is_valid"`
@@ -55,6 +56,7 @@ func New(appID, secret, callback string, scope []string) *Graph {
 		AppID:           appID,
 		Secret:          secret,
 		Scope:           scope,
+		UserID:          "",
 		apptoken:        strings.Join([]string{appID, secret}, "|"),
 		requestTokenURL: reqTok,
 		accessTokenURL:  accessTok,
@@ -107,8 +109,7 @@ func (g *Graph) Authenticate(r *http.Request) error {
 	if values, err = url.ParseQuery(string(result)); err != nil {
 		return err
 	}
-	durationStr := fmt.Sprintf("%ss", values.Get("expires"))
-	if expire, err = time.ParseDuration(durationStr); err != nil {
+	if expire, err = time.ParseDuration(values.Get("expires") + "s"); err != nil {
 		return err
 	}
 
@@ -128,13 +129,13 @@ func (g *Graph) DebugToken(token string) (*DebugInfo, error) {
 		return &info, errors.New("empty token")
 	}
 
-	debugURL, _ := url.Parse("https://graph.facebook.com/debug_token")
-	query := debugURL.Query()
+	endpoint, _ := url.Parse("https://graph.facebook.com/debug_token")
+	query := endpoint.Query()
 	query.Set("input_token", token)
 	query.Set("access_token", g.apptoken)
-	debugURL.RawQuery = query.Encode()
+	endpoint.RawQuery = query.Encode()
 
-	if resp, err = http.Get(debugURL.String()); err != nil {
+	if resp, err = http.Get(endpoint.String()); err != nil {
 		return &info, err
 	}
 	defer resp.Body.Close()
@@ -147,6 +148,10 @@ func (g *Graph) DebugToken(token string) (*DebugInfo, error) {
 
 // Debug access token received after Authenticate. Simplified version of
 // DebugToken as it uses token from Graph struct.
-func (g *Graph) Debug() (*DebugInfo, error) {
-	return g.DebugToken(g.AccessToken)
+func (g *Graph) Debug() (info *DebugInfo, err error) {
+	if info, err = g.DebugToken(g.AccessToken); err != nil {
+		return info, err
+	}
+	g.UserID = strconv.Itoa(info.Data.UserID)
+	return info, nil
 }
