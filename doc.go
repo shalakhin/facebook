@@ -6,8 +6,21 @@
 // These urls are hidden inside Graph struct as they don't change.
 //
 //     // Example
-//     graph, err := facebook.New("mykey", "mysecret")
-//     // ... handle error case
-//     // get request token
-//     graph.Authenticate(scope)
+//     var graph := facebook.New(
+//             "AppID",
+//             "Secret",
+//             "https://example.com/facebook/callback",
+//             []string{"email"},
+//     )
+//
+//     // Signup redirects user to facebook
+//     func Signup(w http.ResponseWriter, r *http.Request) {
+//             http.Redirect(w, r, graph.AuthURL(""), http.StatusFound)
+//     }
+//
+//     // Handle response
+//     func HandleOAuth(w http.ResponseWriter, r *http.Request) {
+//             graph.GetAccessToken(r)
+//     }
+//     
 package facebook
