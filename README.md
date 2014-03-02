@@ -1,4 +1,4 @@
-# facebook
+# facebook [![GoDoc](https://godoc.org/github.com/OShalakhin/facebook?status.png)](https://godoc.org/github.com/OShalakhin/facebook)
 
 Facebook Graph API for Go.
 
