@@ -1,6 +1,8 @@
 package facebook
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -22,9 +24,24 @@ type (
 		// https://developers.facebook.com/docs/facebook-login/permissions/
 		Scope []string
 
+		apptoken        string
 		requestTokenURL *url.URL
 		accessTokenURL  *url.URL
 		callbackURL     *url.URL
+	}
+	// DebugInfo holds information from debug info on particular token
+	DebugInfo struct {
+		Data DebugData `json:"data"`
+	}
+	// DebugData contains all fields returned in DebugInfo
+	DebugData struct {
+		AppID       int       `json:"app_id"`
+		Application string    `json:"application"`
+		ExpiresAt   EpochTime `json:"expires_at"`
+		IsValid     bool      `json:"is_valid"`
+		IssuedAt    EpochTime `json:"issued_at,omitempty"`
+		Scopes      []string  `json:"scopes"`
+		UserID      int       `json:"user_id"`
 	}
 )
 
@@ -35,11 +52,10 @@ func New(appID, secret, callback string, scope []string) *Graph {
 	accessTok, _ = url.Parse("https://graph.facebook.com/oauth/access_token")
 	callbackURL, _ = url.Parse(callback)
 	return &Graph{
-		AppID:  appID,
-		Secret: secret,
-		Scope:  scope,
-		// AccessToken: "",
-		// Expire: time.Time{},
+		AppID:           appID,
+		Secret:          secret,
+		Scope:           scope,
+		apptoken:        strings.Join([]string{appID, secret}, "|"),
 		requestTokenURL: reqTok,
 		accessTokenURL:  accessTok,
 		callbackURL:     callbackURL,
@@ -62,11 +78,11 @@ func (g *Graph) AuthURL(state string) string {
 	return g.requestTokenURL.String()
 }
 
-// GetAccessToken parses request for code and retrieve access token from
+// Authenticate parses request for code and retrieve access token from
 // response and expiration. In case of errors returns error which you can
 // handle on your own (i.e. redirect with error message or return 500 page or
 // else.
-func (g *Graph) GetAccessToken(r *http.Request) error {
+func (g *Graph) Authenticate(r *http.Request) error {
 	var err error
 	var resp *http.Response
 	var result []byte
@@ -99,4 +115,37 @@ func (g *Graph) GetAccessToken(r *http.Request) error {
 	g.AccessToken = values.Get("access_token")
 	g.Expire = expire
 	return nil
+}
+
+// DebugToken retrieves debug information to verify token. Look here:
+// https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow#checktoken
+func (g *Graph) DebugToken(token string) (*DebugInfo, error) {
+	var resp *http.Response
+	var err error
+
+	info := DebugInfo{}
+	if token == "" {
+		return &info, errors.New("empty token")
+	}
+
+	debugURL, _ := url.Parse("https://graph.facebook.com/debug_token")
+	query := debugURL.Query()
+	query.Set("input_token", token)
+	query.Set("access_token", g.apptoken)
+	debugURL.RawQuery = query.Encode()
+
+	if resp, err = http.Get(debugURL.String()); err != nil {
+		return &info, err
+	}
+	defer resp.Body.Close()
+
+	if err = json.NewDecoder(resp.Body).Decode(&info); err != nil {
+		return &info, err
+	}
+	return &info, nil
+}
+
+// Debug access token received after Authenticate
+func (g *Graph) Debug() (*DebugInfo, error) {
+	return g.DebugToken(g.AccessToken)
 }
