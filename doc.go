@@ -1,7 +1,7 @@
 // Package facebook implements Facebook Graph API.
 //
 //     - request token url: https://www.facebook.com/dialog/oauth
-//     - access token urlhttps://graph.facebook.com/oauth/access_token
+//     - access token url https://graph.facebook.com/oauth/access_token
 //
 // These urls are hidden inside Graph struct as they don't change.
 //
