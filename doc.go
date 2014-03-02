@@ -22,5 +22,5 @@
 //     func HandleOAuth(w http.ResponseWriter, r *http.Request) {
 //             graph.GetAccessToken(r)
 //     }
-//     
+//
 package facebook

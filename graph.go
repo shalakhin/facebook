@@ -62,8 +62,15 @@ func (g *Graph) AuthURL(state string) string {
 }
 
 // GetAccessToken parses request for code and retrieve access token from
-// response and expiration
-func (g *Graph) GetAccessToken(r *http.Request) {
+// response and expiration. In case of errors returns error which you can
+// handle on your own (i.e. redirect with error message or return 500 page or
+// else.
+func (g *Graph) GetAccessToken(r *http.Request) error {
+	var err error
+	var resp *http.Response
+	var result []byte
+	var expire time.Duration
+	var values url.Values
 
 	query := g.accessTokenURL.Query()
 	query.Set("client_id", g.AppID)
@@ -72,11 +79,22 @@ func (g *Graph) GetAccessToken(r *http.Request) {
 	query.Set("code", r.URL.Query().Get("code"))
 	g.accessTokenURL.RawQuery = query.Encode()
 
-	resp, _ := http.Get(g.accessTokenURL.String())
+	if resp, err = http.Get(g.accessTokenURL.String()); err != nil {
+		return err
+	}
 	defer resp.Body.Close()
-	result, _ := ioutil.ReadAll(resp.Body)
-	values, _ := url.ParseQuery(string(result))
+
+	if result, err = ioutil.ReadAll(resp.Body); err != nil {
+		return err
+	}
+	if values, err = url.ParseQuery(string(result)); err != nil {
+		return err
+	}
+	if expire, err = time.ParseDuration(values.Get("expires") + "s"); err != nil {
+		return err
+	}
+
 	g.AccessToken = values.Get("access_token")
-	expire, _ := time.ParseDuration(values.Get("expires") + "s")
 	g.Expire = expire
+	return nil
 }
