@@ -35,7 +35,7 @@ type (
 	}
 	// DebugData contains all fields returned in DebugInfo
 	DebugData struct {
-		AppID       int       `json:"app_id"`
+		AppID       string    `json:"app_id"`
 		Application string    `json:"application"`
 		ExpiresAt   EpochTime `json:"expires_at"`
 		IsValid     bool      `json:"is_valid"`
@@ -145,7 +145,8 @@ func (g *Graph) DebugToken(token string) (*DebugInfo, error) {
 	return &info, nil
 }
 
-// Debug access token received after Authenticate
+// Debug access token received after Authenticate. Simplified version of
+// DebugToken as it uses token from Graph struct.
 func (g *Graph) Debug() (*DebugInfo, error) {
 	return g.DebugToken(g.AccessToken)
 }

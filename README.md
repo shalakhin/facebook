@@ -56,7 +56,7 @@ func HandleOAuth(w http.ResponseWriter, r *http.Request) {
 - tests coverage
 - graph API:
   - &#10003; debug token
-  - get user info
+  - &#10003; get basic user info
   - get user image
   - message user
   - ...
