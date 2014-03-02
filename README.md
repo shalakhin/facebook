@@ -1,7 +1,8 @@
 # facebook
 
-Facebook Graph API fo Go. It is work in progress for now and pull requests
-are highly appreciated.
+Facebook Graph API for Go.
+
+It is work in progress for now and pull requests are highly appreciated.
 
 ## Installation & Update
 
@@ -36,4 +37,15 @@ func HandleOAuth(w http.ResponseWriter, r *http.Request) {
 
 ## Docs
 
-TODO
+[Godoc](http://godoc.org/github.com/OShalakhin/facebook)
+
+## TODO
+
+- error handling
+- tests coverage
+- graph API:
+  - debug token
+  - get user info
+  - get user image
+  - message user
+  - ...
