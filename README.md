@@ -38,7 +38,9 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 
 // Handle response
 func HandleOAuth(w http.ResponseWriter, r *http.Request) {
-        graph.GetAccessToken(r)
+        var g *facebook.Graph
+        g = graph
+        g.GetAccessToken(r)
         // now you can get access token
         fmt.Fprintf(w, graph.AccessToken)
 }
@@ -50,10 +52,10 @@ func HandleOAuth(w http.ResponseWriter, r *http.Request) {
 
 ## TODO
 
-- error handling
+- &#10003; error handling
 - tests coverage
 - graph API:
-  - debug token
+  - &#10003; debug token
   - get user info
   - get user image
   - message user

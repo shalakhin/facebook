@@ -20,7 +20,9 @@
 //
 //     // Handle response
 //     func HandleOAuth(w http.ResponseWriter, r *http.Request) {
-//             graph.GetAccessToken(r)
+//             var g *facebook.Graph
+//             g = graph
+//             g.GetAccessToken(r)
 //     }
 //
 package facebook
