@@ -15,6 +15,15 @@ $ go get -u github.com/OShalakhin/facebook # update
 
 ```go
 // Example
+package main
+
+import (
+    "fmt"
+    "net/http"
+
+    "github.com/OShalakhin/facebook"
+)
+
 var graph := facebook.New(
         "AppID",
         "Secret",
