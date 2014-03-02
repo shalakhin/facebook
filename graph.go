@@ -73,7 +73,7 @@ func (g *Graph) GetAccessToken(r *http.Request) {
 	g.accessTokenURL.RawQuery = query.Encode()
 
 	resp, _ := http.Get(g.accessTokenURL.String())
-	defer resp.Body.Close()
+	// defer resp.Body.Close()
 	result, _ := ioutil.ReadAll(resp.Body)
 	values, _ := url.ParseQuery(string(result))
 	g.AccessToken = values.Get("access_token")
