@@ -2,6 +2,15 @@
 
 Facebook Graph API for Go.
 
+[Documentation on Godoc](http://godoc.org/github.com/OShalakhin/facebook)
+
+Implemented:
+
+- OAuth supported
+- Debug information
+- User information (partially)
+- User picture
+
 It is work in progress for now and pull requests are highly appreciated.
 
 ## Installation & Update
@@ -45,18 +54,3 @@ func HandleOAuth(w http.ResponseWriter, r *http.Request) {
         fmt.Fprintf(w, graph.AccessToken)
 }
 ```
-
-## Docs
-
-[Godoc](http://godoc.org/github.com/OShalakhin/facebook)
-
-## TODO
-
-- &#10003; error handling
-- tests coverage
-- graph API:
-  - &#10003; debug token
-  - &#10003; get basic user info
-  - get user image
-  - message user
-  - ...
