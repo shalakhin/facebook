@@ -15,15 +15,12 @@ type (
 	// Graph is a core of this package as its methods allow to communicate with
 	// Facebook Graph API
 	Graph struct {
-		// Register your app at https://developers.facebook.com to get AppID and Secret
-		AppID       string
+		AppID       string // Register your app at https://developers.facebook.com to get AppID and Secret
 		Secret      string
 		AccessToken string
-		Expire      time.Duration
-		// Full list of scope options here:
-		// https://developers.facebook.com/docs/facebook-login/permissions/
-		Scope  []string
-		UserID string
+		Expiry      time.Time
+		Scope       []string // Full list of scope options here: https://developers.facebook.com/docs/facebook-login/permissions/
+		UserID      string
 
 		apptoken        string
 		requestTokenURL *url.URL
@@ -114,7 +111,7 @@ func (g *Graph) Authenticate(r *http.Request) error {
 	}
 
 	g.AccessToken = values.Get("access_token")
-	g.Expire = expire
+	g.Expiry = time.Now().Add(expire)
 	return nil
 }
 
@@ -126,7 +123,7 @@ func (g *Graph) DebugToken(token string) (*DebugInfo, error) {
 
 	info := DebugInfo{}
 	if token == "" {
-		return &info, errors.New("empty token")
+		return nil, errors.New("empty token")
 	}
 
 	endpoint, _ := url.Parse("https://graph.facebook.com/debug_token")
@@ -136,12 +133,12 @@ func (g *Graph) DebugToken(token string) (*DebugInfo, error) {
 	endpoint.RawQuery = query.Encode()
 
 	if resp, err = http.Get(endpoint.String()); err != nil {
-		return &info, err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if err = json.NewDecoder(resp.Body).Decode(&info); err != nil {
-		return &info, err
+		return nil, err
 	}
 	return &info, nil
 }
@@ -150,7 +147,7 @@ func (g *Graph) DebugToken(token string) (*DebugInfo, error) {
 // DebugToken as it uses token from Graph struct.
 func (g *Graph) Debug() (info *DebugInfo, err error) {
 	if info, err = g.DebugToken(g.AccessToken); err != nil {
-		return info, err
+		return nil, err
 	}
 	g.UserID = strconv.Itoa(info.Data.UserID)
 	return info, nil
